@@ -1,14 +1,21 @@
 import streamlit as st
 import pandas as pd
 import pickle
+import os
 
 # ----------------------------------------------------
 # 1. LOAD THE TRAINED MODEL
 # ----------------------------------------------------
-# We use @st.cache_resource so the model loads only once when the app starts
 @st.cache_resource
 def load_model():
-    with open('rf_churn_model.pkl', 'rb') as file:
+    # Find the exact folder where this app.py file lives on the cloud server
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Join that folder path with your model file name
+    model_path = os.path.join(current_dir, 'rf_churn_model.pkl')
+    
+    # Open the file using the absolute path
+    with open(model_path, 'rb') as file:
         return pickle.load(file)
 
 model = load_model()
@@ -51,8 +58,7 @@ def user_input_features():
     intl_plan_encoded = 1 if intl_plan == "Yes" else 0
     vm_plan_encoded = 1 if vm_plan == "Yes" else 0
 
-    # MUST EXACTLY MATCH THE COLUMNS THE MODEL WAS TRAINED ON!
-    # Removed voice_mail_messages and total_charge since your EDA script dropped them
+    # EXACTLY MATCH THE COLUMNS THE MODEL WAS TRAINED ON
     data = {
         'account_length': account_length,
         'voice_mail_plan': vm_plan_encoded,
